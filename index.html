@@ -1,109 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải Pickleball Test</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch sử giải Pickleball</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #fafafa; }
+    h1 { text-align: center; color: #222; margin-bottom: 30px; }
+    h2 { color: #444; margin-top: 40px; }
+    .tournament-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 40px;
+    }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .timestamp { font-size: 0.9em; color: #666; }
+  </style>
 </head>
 <body>
-    <h1>Giải Pickleball Test</h1>
-    <h2>Bảng xếp hạng</h2>
-    <table id="standingsTable">
-        <thead>
-            <tr>
-                <th>Tên</th>
-                <th>Xếp hạng</th>
-                <th>Thắng</th>
-                <th>Thua</th>
-                <th>Điểm</th>
-                <th>Tỷ lệ thắng (%)</th>
-            </tr>
-        </thead>
-        <tbody id="standingsBody"></tbody>
-    </table>
+  <h1>Lịch sử các giải Pickleball</h1>
+  <div id="tournamentsContainer"></div>
 
-    <h2>Trận đấu</h2>
-    <table id="matchesTable">
-        <thead>
-            <tr>
-                <th>Trận</th>
-                <th>Đội 1</th>
-                <th>Đội 2</th>
-                <th>Tỷ số</th>
-                <th>Người thắng</th>
-            </tr>
-        </thead>
-        <tbody id="matchesBody"></tbody>
-    </table>
+<script>
+const SUPABASE_URL = 'https://sugyzhnavjttfmumpacw.supabase.co';
+const SUPABASE_KEY = 'YOUR_ANON_KEY'; // 🔑 Thay bằng key thật từ Supabase → Project Settings → API
 
-   <script>
-    async function fetchTournamentData() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tournamentId = urlParams.get('tournamentId');
-        let apiUrl = 'https://sugyzhnavjttfmumpacw.supabase.co/rest/v1/tournaments?select=*';
-        if (tournamentId) {
-            apiUrl += `&id=eq.${tournamentId}`;
-        }
+async function fetchAllTournaments() {
+  const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*&order=created_at.desc`;
+  try {
+    const res = await fetch(apiUrl, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
 
-        const anonKey = 'YOUR_ANON_KEY'; // Thay bằng key thực hoặc dùng biến môi trường
-        try {
-            const response = await fetch(apiUrl, {
-                headers: {
-                    'apikey': anonKey,
-                    'Authorization': `Bearer ${anonKey}`
-                }
-            });
-            if (!response.ok) throw new Error('Lỗi khi gọi API: ' + response.status);
-            const data = await response.json();
+    if (!res.ok) throw new Error(`Lỗi API: ${res.status}`);
+    const tournaments = await res.json();
 
-            if (data.length === 0) {
-                document.body.innerHTML += '<p>Không tìm thấy giải đấu!</p>';
-                return;
-            }
-
-            // Hiển thị bảng xếp hạng
-            const standingsBody = document.getElementById('standingsBody');
-            data[0].data.Standings.forEach(player => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${player.Name}</td>
-                    <td>${player.Rank}</td>
-                    <td>${player.Wins}</td>
-                    <td>${player.Losses}</td>
-                    <td>${player.Points}</td>
-                    <td>${player.WinRate}</td>
-                `;
-                standingsBody.appendChild(row);
-            });
-
-            // Hiển thị danh sách trận đấu
-            const matchesBody = document.getElementById('matchesBody');
-            data[0].data.Matches.forEach(match => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${match.MatchNumber}</td>
-                    <td>${match.Team1Player1} & ${match.Team1Player2}</td>
-                    <td>${match.Team2Player1} & ${match.Team2Player2}</td>
-                    <td>${match.Score1} - ${match.Score2}</td>
-                    <td>${match.Winner}</td>
-                `;
-                matchesBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error('Lỗi:', error);
-            document.body.innerHTML += `<p style="color: red;">Lỗi khi tải dữ liệu: ${error.message}</p>`;
-        }
+    const container = document.getElementById('tournamentsContainer');
+    if (tournaments.length === 0) {
+      container.innerHTML = '<p>Chưa có giải đấu nào được tải lên.</p>';
+      return;
     }
 
-    fetchTournamentData();
+    tournaments.forEach(tour => {
+      const card = document.createElement('div');
+      card.classList.add('tournament-card');
+
+      const title = document.createElement('h2');
+      title.textContent = tour.name || 'Giải không tên';
+      card.appendChild(title);
+
+      const time = document.createElement('div');
+      time.className = 'timestamp';
+      time.textContent = `Ngày tạo: ${new Date(tour.created_at).toLocaleString()}`;
+      card.appendChild(time);
+
+      const standings = tour.data.Standings || [];
+      const matches = tour.data.Matches || [];
+
+      // Bảng xếp hạng
+      if (standings.length > 0) {
+        const standingsTable = document.createElement('table');
+        standingsTable.innerHTML = `
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Xếp hạng</th>
+              <th>Thắng</th>
+              <th>Thua</th>
+              <th>Điểm</th>
+              <th>Tỷ lệ thắng (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${standings.map(p => `
+              <tr>
+                <td>${p.Name}</td>
+                <td>${p.Rank}</td>
+                <td>${p.Wins}</td>
+                <td>${p.Losses}</td>
+                <td>${p.Points}</td>
+                <td>${p.WinRate}</td>
+              </tr>`).join('')}
+          </tbody>
+        `;
+        card.innerHTML += '<h3>Bảng xếp hạng</h3>';
+        card.appendChild(standingsTable);
+      }
+
+      // Danh sách trận đấu
+      if (matches.length > 0) {
+        const matchesTable = document.createElement('table');
+        matchesTable.innerHTML = `
+          <thead>
+            <tr>
+              <th>Trận</th>
+              <th>Đội 1</th>
+              <th>Đội 2</th>
+              <th>Tỷ số</th>
+              <th>Người thắng</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${matches.map(m => `
+              <tr>
+                <td>${m.MatchNumber}</td>
+                <td>${m.Team1Player1} & ${m.Team1Player2}</td>
+                <td>${m.Team2Player1} & ${m.Team2Player2}</td>
+                <td>${m.Score1} - ${m.Score2}</td>
+                <td>${m.Winner}</td>
+              </tr>`).join('')}
+          </tbody>
+        `;
+        card.innerHTML += '<h3>Trận đấu</h3>';
+        card.appendChild(matchesTable);
+      }
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.body.innerHTML = `<p style="color:red;">Lỗi tải dữ liệu: ${err.message}</p>`;
+  }
+}
+
+fetchAllTournaments();
 </script>
 </body>
 </html>
+
+
 
