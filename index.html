@@ -36,7 +36,7 @@
     }
 
     header h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin: 0;
       animation: fadeInDown 0.8s ease;
     }
@@ -97,10 +97,18 @@
       margin-bottom: 15px;
     }
 
+    /* ✅ Thêm khung scroll ngang cho bảng */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
+      border-radius: 10px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      min-width: 600px; /* đảm bảo bảng đủ rộng để scroll */
       border-radius: 8px;
       overflow: hidden;
     }
@@ -109,6 +117,7 @@
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       text-align: center;
+      white-space: nowrap; /* tránh xuống dòng cột */
     }
 
     th {
@@ -156,7 +165,7 @@
       100% { opacity: 0.4; }
     }
 
-    /* Button scroll lên đầu */
+    /* Nút scroll lên đầu */
     #scrollTopBtn {
       position: fixed;
       bottom: 25px;
@@ -181,6 +190,12 @@
 
     #scrollTopBtn.show {
       opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.5rem; }
+      .tournament-card { padding: 18px; }
     }
   </style>
 </head>
@@ -238,29 +253,31 @@ async function fetchAllTournaments() {
       if (standings.length > 0) {
         const standingsTable = `
           <h3>Bảng xếp hạng</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Hạng</th>
-                <th>Tên</th>
-                <th>Thắng</th>
-                <th>Thua</th>
-                <th>Điểm</th>
-                <th>Tỷ lệ thắng (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${standings.map(p => `
+          <div class="table-wrapper">
+            <table>
+              <thead>
                 <tr>
-                  <td>${p.Rank}</td>
-                  <td>${p.Name}</td>
-                  <td>${p.Wins}</td>
-                  <td>${p.Losses}</td>
-                  <td>${p.Points}</td>
-                  <td>${p.WinRate}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
+                  <th>Hạng</th>
+                  <th>Tên</th>
+                  <th>Thắng</th>
+                  <th>Thua</th>
+                  <th>Điểm</th>
+                  <th>Tỷ lệ thắng (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${standings.map(p => `
+                  <tr>
+                    <td>${p.Rank}</td>
+                    <td>${p.Name}</td>
+                    <td>${p.Wins}</td>
+                    <td>${p.Losses}</td>
+                    <td>${p.Points}</td>
+                    <td>${p.WinRate}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
         card.innerHTML += standingsTable;
       }
@@ -268,27 +285,29 @@ async function fetchAllTournaments() {
       if (matches.length > 0) {
         const matchesTable = `
           <h3>Trận đấu</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Trận</th>
-                <th>Đội 1</th>
-                <th>Đội 2</th>
-                <th>Tỷ số</th>
-                <th>Người thắng</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${matches.map(m => `
+          <div class="table-wrapper">
+            <table>
+              <thead>
                 <tr>
-                  <td>${m.MatchNumber}</td>
-                  <td>${m.Team1Player1} & ${m.Team1Player2}</td>
-                  <td>${m.Team2Player1} & ${m.Team2Player2}</td>
-                  <td>${m.Score1} - ${m.Score2}</td>
-                  <td>${m.Winner}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
+                  <th>Trận</th>
+                  <th>Đội 1</th>
+                  <th>Đội 2</th>
+                  <th>Tỷ số</th>
+                  <th>Người thắng</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${matches.map(m => `
+                  <tr>
+                    <td>${m.MatchNumber}</td>
+                    <td>${m.Team1Player1} & ${m.Team1Player2}</td>
+                    <td>${m.Team2Player1} & ${m.Team2Player2}</td>
+                    <td>${m.Score1} - ${m.Score2}</td>
+                    <td>${m.Winner}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
         card.innerHTML += matchesTable;
       }
@@ -316,4 +335,3 @@ fetchAllTournaments();
 </script>
 </body>
 </html>
-
