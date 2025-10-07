@@ -27,7 +27,7 @@
 
 <script>
 const SUPABASE_URL = 'https://sugyzhnavjttfmumpacw.supabase.co';
-const SUPABASE_KEY = 'YOUR_ANON_KEY'; // 🔑 Thay bằng key thật từ Supabase → Project Settings → API
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3l6aG5hdmp0dGZtdW1wYWN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDc1NTUsImV4cCI6MjA3NTM4MzU1NX0.GQC71AfsKLwvqGu6c0rfDLUq8WmfEVUfrJwQ1Qs5Khs'; // 🔑 Thay bằng key thật từ Supabase → Project Settings → API
 
 async function fetchAllTournaments() {
   const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*&order=created_at.desc`;
@@ -135,6 +135,7 @@ fetchAllTournaments();
 </script>
 </body>
 </html>
+
 
 
 
