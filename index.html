@@ -3,214 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lịch sử Pickleball của anh em mình 🏓</title>
+  <title>Lịch sử Pickleball của mấy anh em mình</title>
   <style>
-    :root {
-      --primary: #007aff;
-      --secondary: #00c896;
-      --bg: #f4f7fb;
-      --card-bg: #fff;
-      --text: #333;
-      --text-light: #666;
-      --border: #e2e8f0;
-    }
-
     body {
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
+      background-color: #f7f9fc;
+      color: #333;
     }
 
     header {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #00b4db, #0083b0);
       color: white;
       text-align: center;
-      padding: 30px 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      padding: 25px 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      margin: 0;
-      animation: fadeInDown 0.8s ease;
-    }
+    h1 { margin: 0; font-size: 1.8em; }
 
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    main {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
+    /* Tabs */
+    .tab-container {
       display: flex;
-      flex-direction: column;
-      gap: 30px;
-      animation: fadeIn 1s ease;
+      justify-content: center;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-bottom: 1px solid #eee;
     }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 15px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      font-weight: 600;
+    }
+    .tab:hover { background: #f0f0f0; }
+    .tab.active {
+      background: linear-gradient(135deg, #00b4db, #0083b0);
+      color: white;
+    }
+
+    /* Content sections */
+    .content { display: none; padding: 20px; animation: fadeIn 0.5s ease; }
+    .content.active { display: block; }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Tournament cards */
     .tournament-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      padding: 25px;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .tournament-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .tournament-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 5px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 14px 14px 0 0;
-    }
-
-    h2 {
-      margin-top: 0;
-      color: var(--primary);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .timestamp {
-      font-size: 0.9em;
-      color: var(--text-light);
-      margin-bottom: 15px;
-    }
-
-    /* ✅ Thêm khung scroll ngang cho bảng */
-    .table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-top: 10px;
-      border-radius: 10px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 900px;
+      overflow-x: auto; /* cuộn ngang khi cần */
     }
 
     table {
-      width: 100%;
       border-collapse: collapse;
-      min-width: 600px; /* đảm bảo bảng đủ rộng để scroll */
-      border-radius: 8px;
-      overflow: hidden;
+      width: 100%;
+      margin-top: 10px;
+      min-width: 600px;
     }
 
     th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
+      border: 1px solid #ddd;
+      padding: 10px;
       text-align: center;
-      white-space: nowrap; /* tránh xuống dòng cột */
+      white-space: nowrap;
     }
 
-    th {
-      background: #f9fafc;
-      font-weight: bold;
-      color: var(--text);
-    }
+    th { background-color: #f2f2f2; }
 
-    tr:hover {
-      background-color: #f5faff;
-      transition: background-color 0.2s ease;
-    }
+    .timestamp { font-size: 0.9em; color: #666; }
 
-    h3 {
-      color: var(--secondary);
-      margin-top: 25px;
-      margin-bottom: 10px;
-    }
-
-    .empty {
-      text-align: center;
-      font-size: 1.1rem;
-      color: var(--text-light);
-      margin-top: 40px;
-    }
-
-    footer {
-      text-align: center;
-      color: #888;
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
       padding: 20px;
-      font-size: 0.9rem;
     }
 
-    .loading {
-      text-align: center;
-      color: var(--text-light);
-      font-size: 1.1rem;
-      margin-top: 50px;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
-    }
-
-    /* Nút scroll lên đầu */
-    #scrollTopBtn {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 20px;
+    .gallery img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      opacity: 0;
-      transition: all 0.3s ease;
     }
 
-    #scrollTopBtn:hover {
-      background: var(--secondary);
-      transform: scale(1.1);
-    }
-
-    #scrollTopBtn.show {
-      opacity: 1;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      header h1 { font-size: 1.5rem; }
-      .tournament-card { padding: 18px; }
+    .gallery img:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Lịch sử chiến Pickleball của anh em mình 🏓</h1>
+    <h1>Lịch sử Pickleball của mấy anh em mình 🏓</h1>
   </header>
 
-  <main id="tournamentsContainer">
-    <div class="loading">Đang tải dữ liệu...</div>
-  </main>
+  <div class="tab-container">
+    <div class="tab active" onclick="showTab('tournaments')">🏆 Giải đấu</div>
+    <div class="tab" onclick="showTab('gallery')">📸 Hình ảnh</div>
+  </div>
 
-  <button id="scrollTopBtn" onclick="scrollToTop()">⬆</button>
+  <div id="tournaments" class="content active">
+    <div id="tournamentsContainer"></div>
+  </div>
 
-  <footer>© 2025 Pickleball Records | Made with ❤️ by Nguyên</footer>
+  <div id="gallery" class="content">
+    <h2 style="text-align:center; margin-top:10px;">📸 Bộ sưu tập ảnh Pickleball</h2>
+    <div class="gallery" id="galleryContainer">
+      <img src="https://images.unsplash.com/photo-1709133596711-9c90c3a2a8c3?q=80&w=800" alt="Pickleball 1">
+      <img src="https://images.unsplash.com/photo-1692725874597-4bfbf7c31d07?q=80&w=800" alt="Pickleball 2">
+      <img src="https://images.unsplash.com/photo-1675973679615-bc6e83e5f2b1?q=80&w=800" alt="Pickleball 3">
+      <img src="https://images.unsplash.com/photo-1690567730791-d828d9318b92?q=80&w=800" alt="Pickleball 4">
+    </div>
+  </div>
 
 <script>
 const SUPABASE_URL = 'https://sugyzhnavjttfmumpacw.supabase.co';
@@ -218,9 +133,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 async function fetchAllTournaments() {
   const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*&order=created_at.desc`;
-  const container = document.getElementById('tournamentsContainer');
-  container.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
-  
   try {
     const res = await fetch(apiUrl, {
       headers: {
@@ -232,84 +144,80 @@ async function fetchAllTournaments() {
     if (!res.ok) throw new Error(`Lỗi API: ${res.status}`);
     const tournaments = await res.json();
 
+    const container = document.getElementById('tournamentsContainer');
     if (tournaments.length === 0) {
-      container.innerHTML = '<p class="empty">Chưa có giải đấu nào được tải lên 🕹️</p>';
+      container.innerHTML = '<p>Chưa có giải đấu nào được tải lên.</p>';
       return;
     }
 
-    container.innerHTML = '';
     tournaments.forEach(tour => {
       const card = document.createElement('div');
       card.classList.add('tournament-card');
 
-      card.innerHTML = `
-        <h2>${tour.name || 'Giải không tên'}</h2>
-        <div class="timestamp">Ngày tạo: ${new Date(tour.created_at).toLocaleString()}</div>
-      `;
+      const title = document.createElement('h2');
+      title.textContent = tour.name || 'Giải không tên';
+      card.appendChild(title);
+
+      const time = document.createElement('div');
+      time.className = 'timestamp';
+      time.textContent = `Ngày tạo: ${new Date(tour.created_at).toLocaleString()}`;
+      card.appendChild(time);
 
       const standings = tour.data?.Standings || [];
       const matches = tour.data?.Matches || [];
 
       if (standings.length > 0) {
-        const standingsTable = `
-          <h3>Bảng xếp hạng</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Hạng</th>
-                  <th>Tên</th>
-                  <th>Thắng</th>
-                  <th>Thua</th>
-                  <th>Điểm</th>
-                  <th>Tỷ lệ thắng (%)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${standings.map(p => `
-                  <tr>
-                    <td>${p.Rank}</td>
-                    <td>${p.Name}</td>
-                    <td>${p.Wins}</td>
-                    <td>${p.Losses}</td>
-                    <td>${p.Points}</td>
-                    <td>${p.WinRate}</td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-        card.innerHTML += standingsTable;
+        const standingsTable = document.createElement('table');
+        standingsTable.innerHTML = `
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Xếp hạng</th>
+              <th>Thắng</th>
+              <th>Thua</th>
+              <th>Điểm</th>
+              <th>Tỷ lệ thắng (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${standings.map(p => `
+              <tr>
+                <td>${p.Name}</td>
+                <td>${p.Rank}</td>
+                <td>${p.Wins}</td>
+                <td>${p.Losses}</td>
+                <td>${p.Points}</td>
+                <td>${p.WinRate}</td>
+              </tr>`).join('')}
+          </tbody>`;
+        card.innerHTML += '<h3>Bảng xếp hạng</h3>';
+        card.appendChild(standingsTable);
       }
 
       if (matches.length > 0) {
-        const matchesTable = `
-          <h3>Trận đấu</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Trận</th>
-                  <th>Đội 1</th>
-                  <th>Đội 2</th>
-                  <th>Tỷ số</th>
-                  <th>Người thắng</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${matches.map(m => `
-                  <tr>
-                    <td>${m.MatchNumber}</td>
-                    <td>${m.Team1Player1} & ${m.Team1Player2}</td>
-                    <td>${m.Team2Player1} & ${m.Team2Player2}</td>
-                    <td>${m.Score1} - ${m.Score2}</td>
-                    <td>${m.Winner}</td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-        card.innerHTML += matchesTable;
+        const matchesTable = document.createElement('table');
+        matchesTable.innerHTML = `
+          <thead>
+            <tr>
+              <th>Trận</th>
+              <th>Đội 1</th>
+              <th>Đội 2</th>
+              <th>Tỷ số</th>
+              <th>Người thắng</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${matches.map(m => `
+              <tr>
+                <td>${m.MatchNumber}</td>
+                <td>${m.Team1Player1} & ${m.Team1Player2}</td>
+                <td>${m.Team2Player1} & ${m.Team2Player2}</td>
+                <td>${m.Score1} - ${m.Score2}</td>
+                <td>${m.Winner}</td>
+              </tr>`).join('')}
+          </tbody>`;
+        card.innerHTML += '<h3>Trận đấu</h3>';
+        card.appendChild(matchesTable);
       }
 
       container.appendChild(card);
@@ -317,19 +225,17 @@ async function fetchAllTournaments() {
 
   } catch (err) {
     console.error(err);
-    container.innerHTML = `<p style="color:red; text-align:center;">Lỗi tải dữ liệu: ${err.message}</p>`;
+    document.getElementById('tournamentsContainer').innerHTML =
+      `<p style="color:red;">Lỗi tải dữ liệu: ${err.message}</p>`;
   }
 }
 
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+  document.getElementById(tabId).classList.add('active');
 }
-
-window.addEventListener('scroll', () => {
-  const btn = document.getElementById('scrollTopBtn');
-  if (window.scrollY > 300) btn.classList.add('show');
-  else btn.classList.remove('show');
-});
 
 fetchAllTournaments();
 </script>
