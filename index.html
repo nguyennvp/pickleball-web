@@ -43,57 +43,67 @@
         <tbody id="matchesBody"></tbody>
     </table>
 
-    <script>
-        async function fetchTournamentData() {
-            const url = 'https://sugyzhnavjttfmumpacw.supabase.co/rest/v1/tournaments?select=*';
-            const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3l6aG5hdmp0dGZtdW1wYWN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDc1NTUsImV4cCI6MjA3NTM4MzU1NX0.GQC71AfsKLwvqGu6c0rfDLUq8WmfEVUfrJwQ1Qs5Khs';
-
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        'apikey': anonKey,
-                        'Authorization': `Bearer ${anonKey}`
-                    }
-                });
-                if (!response.ok) throw new Error('Lỗi khi gọi API: ' + response.status);
-                const data = await response.json();
-
-                // Hiển thị bảng xếp hạng
-                const standingsBody = document.getElementById('standingsBody');
-                data[0].data.Standings.forEach(player => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${player.Name}</td>
-                        <td>${player.Rank}</td>
-                        <td>${player.Wins}</td>
-                        <td>${player.Losses}</td>
-                        <td>${player.Points}</td>
-                        <td>${player.WinRate}</td>
-                    `;
-                    standingsBody.appendChild(row);
-                });
-
-                // Hiển thị danh sách trận đấu
-                const matchesBody = document.getElementById('matchesBody');
-                data[0].data.Matches.forEach(match => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${match.MatchNumber}</td>
-                        <td>${match.Team1Player1} & ${match.Team1Player2}</td>
-                        <td>${match.Team2Player1} & ${match.Team2Player2}</td>
-                        <td>${match.Score1} - ${match.Score2}</td>
-                        <td>${match.Winner}</td>
-                    `;
-                    matchesBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Lỗi:', error);
-                document.body.innerHTML += `<p style="color: red;">Lỗi khi tải dữ liệu: ${error.message}</p>`;
-            }
+   <script>
+    async function fetchTournamentData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tournamentId = urlParams.get('tournamentId');
+        let apiUrl = 'https://sugyzhnavjttfmumpacw.supabase.co/rest/v1/tournaments?select=*';
+        if (tournamentId) {
+            apiUrl += `&id=eq.${tournamentId}`;
         }
 
-        // Gọi hàm khi trang tải
-        fetchTournamentData();
-    </script>
+        const anonKey = 'YOUR_ANON_KEY'; // Thay bằng key thực hoặc dùng biến môi trường
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'apikey': anonKey,
+                    'Authorization': `Bearer ${anonKey}`
+                }
+            });
+            if (!response.ok) throw new Error('Lỗi khi gọi API: ' + response.status);
+            const data = await response.json();
+
+            if (data.length === 0) {
+                document.body.innerHTML += '<p>Không tìm thấy giải đấu!</p>';
+                return;
+            }
+
+            // Hiển thị bảng xếp hạng
+            const standingsBody = document.getElementById('standingsBody');
+            data[0].data.Standings.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${player.Name}</td>
+                    <td>${player.Rank}</td>
+                    <td>${player.Wins}</td>
+                    <td>${player.Losses}</td>
+                    <td>${player.Points}</td>
+                    <td>${player.WinRate}</td>
+                `;
+                standingsBody.appendChild(row);
+            });
+
+            // Hiển thị danh sách trận đấu
+            const matchesBody = document.getElementById('matchesBody');
+            data[0].data.Matches.forEach(match => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${match.MatchNumber}</td>
+                    <td>${match.Team1Player1} & ${match.Team1Player2}</td>
+                    <td>${match.Team2Player1} & ${match.Team2Player2}</td>
+                    <td>${match.Score1} - ${match.Score2}</td>
+                    <td>${match.Winner}</td>
+                `;
+                matchesBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Lỗi:', error);
+            document.body.innerHTML += `<p style="color: red;">Lỗi khi tải dữ liệu: ${error.message}</p>`;
+        }
+    }
+
+    fetchTournamentData();
+</script>
 </body>
 </html>
+
