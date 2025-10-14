@@ -286,7 +286,7 @@ function formatGoalDifference(diff) {
 }
 
 async function fetchAllTournaments() {
-  const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*&order=created_at.desc`;
+  const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*`;
   const container = document.getElementById('tournamentsContainer');
   container.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
   
@@ -299,17 +299,25 @@ async function fetchAllTournaments() {
     });
 
     if (!res.ok) throw new Error(`Lỗi API: ${res.status}`);
-    const tournaments = await res.json();
+    let tournaments = await res.json();
 
     if (tournaments.length === 0) {
       container.innerHTML = '<p class="empty">Chưa có giải đấu nào được tải lên 🕹️</p>';
       return;
     }
 
-    // Nhóm theo tháng
+    // Sắp xếp theo ngày giải đấu (date field) - mới nhất trước
+    tournaments.sort((a, b) => {
+      const dateA = parseDateString(a.data?.Date || a.created_at);
+      const dateB = parseDateString(b.data?.Date || b.created_at);
+      return dateB - dateA; // Sắp xếp giảm dần (mới nhất trước)
+    });
+
+    // Nhóm theo tháng dựa trên ngày giải đấu
     const tournamentsByMonth = {};
     tournaments.forEach(tour => {
-      const monthYear = getMonthYear(tour.created_at);
+      const tournamentDate = parseDateString(tour.data?.Date || tour.created_at);
+      const monthYear = getMonthYearFromDate(tournamentDate);
       if (!tournamentsByMonth[monthYear]) {
         tournamentsByMonth[monthYear] = [];
       }
@@ -318,8 +326,20 @@ async function fetchAllTournaments() {
 
     container.innerHTML = '';
 
-    // Render từng tháng
-    Object.keys(tournamentsByMonth).forEach(monthYear => {
+    // Sắp xếp các tháng theo thứ tự thời gian (tháng mới nhất trước)
+    const sortedMonths = Object.keys(tournamentsByMonth).sort((a, b) => {
+      // Parse tháng từ string "Tháng X YYYY" để so sánh
+      const monthA = parseInt(a.match(/Tháng (\d+)/)?.[1] || '0');
+      const yearA = parseInt(a.match(/(\d{4})/)?.[1] || '0');
+      const monthB = parseInt(b.match(/Tháng (\d+)/)?.[1] || '0');
+      const yearB = parseInt(b.match(/(\d{4})/)?.[1] || '0');
+      
+      if (yearA !== yearB) return yearB - yearA;
+      return monthB - monthA;
+    });
+
+    // Render từng tháng theo thứ tự đã sắp xếp
+    sortedMonths.forEach(monthYear => {
       const monthSection = document.createElement('div');
       monthSection.classList.add('month-section');
 
@@ -328,13 +348,17 @@ async function fetchAllTournaments() {
       monthHeader.textContent = monthYear;
       monthSection.appendChild(monthHeader);
 
+      // Các tournament trong tháng đã được sắp xếp theo ngày
       tournamentsByMonth[monthYear].forEach(tour => {
         const card = document.createElement('div');
         card.classList.add('tournament-card');
 
+        // Hiển thị ngày giải đấu thay vì ngày tạo
+        const tourDate = parseDateString(tour.data?.Date || tour.created_at);
         card.innerHTML = `
           <h2>${tour.name || 'Giải không tên'}</h2>
-          <div class="timestamp">Ngày tạo: ${new Date(tour.created_at).toLocaleString('vi-VN')}</div>
+          <div class="timestamp">Ngày giải: ${tourDate.toLocaleDateString('vi-VN')} ${tourDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}</div>
+          <div class="timestamp" style="font-size: 0.85em;">Tạo: ${new Date(tour.created_at).toLocaleString('vi-VN', {dateStyle: 'short', timeStyle: 'short'})}</div>
         `;
 
         const standings = tour.data?.Standings || [];
@@ -416,6 +440,13 @@ async function fetchAllTournaments() {
   }
 }
 
+// Thêm function mới để lấy tháng năm từ Date object
+function getMonthYearFromDate(date) {
+  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                      "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -430,3 +461,4 @@ fetchAllTournaments();
 </script>
 </body>
 </html>
+
