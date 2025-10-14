@@ -61,30 +61,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Nhóm theo tháng */
-    .month-section {
-      margin-bottom: 40px;
-    }
-
-    .month-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 25px;
-      border-radius: 12px;
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .month-header::before {
-      content: "📅";
-      font-size: 1.5rem;
-    }
-
     .tournament-card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -93,7 +69,6 @@
       position: relative;
       overflow: hidden;
       transition: all 0.3s ease;
-      margin-bottom: 20px;
     }
 
     .tournament-card:hover {
@@ -122,6 +97,7 @@
       margin-bottom: 15px;
     }
 
+    /* ✅ Thêm khung scroll ngang cho bảng */
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -132,7 +108,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 600px;
+      min-width: 600px; /* đảm bảo bảng đủ rộng để scroll */
       border-radius: 8px;
       overflow: hidden;
     }
@@ -141,7 +117,7 @@
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       text-align: center;
-      white-space: nowrap;
+      white-space: nowrap; /* tránh xuống dòng cột */
     }
 
     th {
@@ -153,21 +129,6 @@
     tr:hover {
       background-color: #f5faff;
       transition: background-color 0.2s ease;
-    }
-
-    /* Highlight hiệu số */
-    .goal-diff-positive {
-      color: #00c896;
-      font-weight: bold;
-    }
-
-    .goal-diff-negative {
-      color: #ff4757;
-      font-weight: bold;
-    }
-
-    .goal-diff-zero {
-      color: #666;
     }
 
     h3 {
@@ -204,6 +165,7 @@
       100% { opacity: 0.4; }
     }
 
+    /* Nút scroll lên đầu */
     #scrollTopBtn {
       position: fixed;
       bottom: 25px;
@@ -230,10 +192,10 @@
       opacity: 1;
     }
 
+    /* Responsive */
     @media (max-width: 600px) {
       header h1 { font-size: 1.5rem; }
       .tournament-card { padding: 18px; }
-      .month-header { font-size: 1.1rem; padding: 12px 20px; }
     }
   </style>
 </head>
@@ -254,39 +216,8 @@
 const SUPABASE_URL = 'https://sugyzhnavjttfmumpacw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3l6aG5hdmp0dGZtdW1wYWN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDc1NTUsImV4cCI6MjA3NTM4MzU1NX0.GQC71AfsKLwvqGu6c0rfDLUq8WmfEVUfrJwQ1Qs5Khs';
 
-function getMonthYear(dateString) {
-  const date = parseDateString(dateString);
-  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-                      "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function parseDateString(dateStr) {
-  // Chuyển đổi "14/10/2025 08:41:38" sang Date object
-  if (!dateStr) return new Date();
-  const parts = dateStr.split(' ');
-  if (parts.length >= 1) {
-    const dateParts = parts[0].split('/');
-    if (dateParts.length === 3) {
-      // dd/MM/yyyy -> yyyy-MM-dd
-      return new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-    }
-  }
-  return new Date(dateStr);
-}
-
-function formatGoalDifference(diff) {
-  if (diff > 0) {
-    return `<span class="goal-diff-positive">+${diff}</span>`;
-  } else if (diff < 0) {
-    return `<span class="goal-diff-negative">${diff}</span>`;
-  } else {
-    return `<span class="goal-diff-zero">0</span>`;
-  }
-}
-
 async function fetchAllTournaments() {
-  const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*`;
+  const apiUrl = `${SUPABASE_URL}/rest/v1/tournaments?select=*&order=created_at.desc`;
   const container = document.getElementById('tournamentsContainer');
   container.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
   
@@ -299,152 +230,95 @@ async function fetchAllTournaments() {
     });
 
     if (!res.ok) throw new Error(`Lỗi API: ${res.status}`);
-    let tournaments = await res.json();
+    const tournaments = await res.json();
 
     if (tournaments.length === 0) {
       container.innerHTML = '<p class="empty">Chưa có giải đấu nào được tải lên 🕹️</p>';
       return;
     }
 
-    // Sắp xếp theo ngày giải đấu (date field) - mới nhất trước
-    tournaments.sort((a, b) => {
-      const dateA = parseDateString(a.data?.Date || a.created_at);
-      const dateB = parseDateString(b.data?.Date || b.created_at);
-      return dateB - dateA; // Sắp xếp giảm dần (mới nhất trước)
-    });
-
-    // Nhóm theo tháng dựa trên ngày giải đấu
-    const tournamentsByMonth = {};
-    tournaments.forEach(tour => {
-      const tournamentDate = parseDateString(tour.data?.Date || tour.created_at);
-      const monthYear = getMonthYearFromDate(tournamentDate);
-      if (!tournamentsByMonth[monthYear]) {
-        tournamentsByMonth[monthYear] = [];
-      }
-      tournamentsByMonth[monthYear].push(tour);
-    });
-
     container.innerHTML = '';
+    tournaments.forEach(tour => {
+      const card = document.createElement('div');
+      card.classList.add('tournament-card');
 
-    // Sắp xếp các tháng theo thứ tự thời gian (tháng mới nhất trước)
-    const sortedMonths = Object.keys(tournamentsByMonth).sort((a, b) => {
-      // Parse tháng từ string "Tháng X YYYY" để so sánh
-      const monthA = parseInt(a.match(/Tháng (\d+)/)?.[1] || '0');
-      const yearA = parseInt(a.match(/(\d{4})/)?.[1] || '0');
-      const monthB = parseInt(b.match(/Tháng (\d+)/)?.[1] || '0');
-      const yearB = parseInt(b.match(/(\d{4})/)?.[1] || '0');
-      
-      if (yearA !== yearB) return yearB - yearA;
-      return monthB - monthA;
-    });
+      card.innerHTML = `
+        <h2>${tour.name || 'Giải không tên'}</h2>
+        <div class="timestamp">Ngày tạo: ${new Date(tour.created_at).toLocaleString()}</div>
+      `;
 
-    // Render từng tháng theo thứ tự đã sắp xếp
-    sortedMonths.forEach(monthYear => {
-      const monthSection = document.createElement('div');
-      monthSection.classList.add('month-section');
+      const standings = tour.data?.Standings || [];
+      const matches = tour.data?.Matches || [];
 
-      const monthHeader = document.createElement('div');
-      monthHeader.classList.add('month-header');
-      monthHeader.textContent = monthYear;
-      monthSection.appendChild(monthHeader);
-
-      // Các tournament trong tháng đã được sắp xếp theo ngày
-      tournamentsByMonth[monthYear].forEach(tour => {
-        const card = document.createElement('div');
-        card.classList.add('tournament-card');
-
-        // Hiển thị ngày giải đấu thay vì ngày tạo
-        const tourDate = parseDateString(tour.data?.Date || tour.created_at);
-        card.innerHTML = `
-          <h2>${tour.name || 'Giải không tên'}</h2>
-          <div class="timestamp">Ngày giải: ${tourDate.toLocaleDateString('vi-VN')} ${tourDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}</div>
-          <div class="timestamp" style="font-size: 0.85em;">Ngày tạo: ${new Date(tour.created_at).toLocaleString('vi-VN', {dateStyle: 'short', timeStyle: 'short'})}</div>
+      if (standings.length > 0) {
+        const standingsTable = `
+          <h3>Bảng xếp hạng</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hạng</th>
+                  <th>Tên</th>
+                  <th>Thắng</th>
+                  <th>Thua</th>
+                  <th>Điểm</th>
+                  <th>Tỷ lệ thắng (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${standings.map(p => `
+                  <tr>
+                    <td>${p.Rank}</td>
+                    <td>${p.Name}</td>
+                    <td>${p.Wins}</td>
+                    <td>${p.Losses}</td>
+                    <td>${p.Points}</td>
+                    <td>${p.WinRate}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
+        card.innerHTML += standingsTable;
+      }
 
-        const standings = tour.data?.Standings || [];
-        const matches = tour.data?.Matches || [];
-
-        if (standings.length > 0) {
-          const standingsTable = `
-            <h3>Bảng xếp hạng</h3>
-            <div class="table-wrapper">
-              <table>
-                <thead>
+      if (matches.length > 0) {
+        const matchesTable = `
+          <h3>Trận đấu</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trận</th>
+                  <th>Đội 1</th>
+                  <th>Đội 2</th>
+                  <th>Tỷ số</th>
+                  <th>Người thắng</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${matches.map(m => `
                   <tr>
-                    <th>Hạng</th>
-                    <th>Tên</th>
-                    <th>Thắng</th>
-                    <th>Thua</th>
-                    <th>Điểm</th>
-                    <th>Hiệu số</th>
-                    <th>Tỷ lệ thắng (%)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${standings.map(p => `
-                    <tr>
-                      <td><strong>${p.Rank}</strong></td>
-                      <td><strong>${p.Name}</strong></td>
-                      <td>${p.Wins}</td>
-                      <td>${p.Losses}</td>
-                      <td><strong>${p.Points}</strong></td>
-                      <td>${formatGoalDifference(p.GoalDifference)}</td>
-                      <td>${p.WinRate}%</td>
-                    </tr>`).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-          card.innerHTML += standingsTable;
-        }
+                    <td>${m.MatchNumber}</td>
+                    <td>${m.Team1Player1} & ${m.Team1Player2}</td>
+                    <td>${m.Team2Player1} & ${m.Team2Player2}</td>
+                    <td>${m.Score1} - ${m.Score2}</td>
+                    <td>${m.Winner}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        card.innerHTML += matchesTable;
+      }
 
-        if (matches.length > 0) {
-          const matchesTable = `
-            <h3>Trận đấu (${matches.filter(m => m.IsCompleted).length}/${matches.length} hoàn thành)</h3>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Trận</th>
-                    <th>Đội 1</th>
-                    <th>Đội 2</th>
-                    <th>Tỷ số</th>
-                    <th>Người thắng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${matches.map(m => `
-                    <tr style="${m.IsCompleted ? '' : 'opacity: 0.5;'}">
-                      <td>${m.MatchNumber}</td>
-                      <td>${m.Team1Player1} & ${m.Team1Player2}</td>
-                      <td>${m.Team2Player1} & ${m.Team2Player2}</td>
-                      <td><strong>${m.Score1} - ${m.Score2}</strong></td>
-                      <td>${m.Winner || '-'}</td>
-                    </tr>`).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-          card.innerHTML += matchesTable;
-        }
-
-        monthSection.appendChild(card);
-      });
-
-      container.appendChild(monthSection);
+      container.appendChild(card);
     });
 
   } catch (err) {
     console.error(err);
     container.innerHTML = `<p style="color:red; text-align:center;">Lỗi tải dữ liệu: ${err.message}</p>`;
   }
-}
-
-// Thêm function mới để lấy tháng năm từ Date object
-function getMonthYearFromDate(date) {
-  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-                      "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function scrollToTop() {
@@ -461,6 +335,5 @@ fetchAllTournaments();
 </script>
 </body>
 </html>
-
 
 
