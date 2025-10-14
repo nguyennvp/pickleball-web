@@ -357,6 +357,7 @@ async function fetchAllTournaments() {
         const tourDate = parseDateString(tour.data?.Date || tour.created_at);
         card.innerHTML = `
           <h2>${tour.name || 'Giải không tên'}</h2>
+          <div class="timestamp">Ngày giải: ${tourDate.toLocaleDateString('vi-VN')} ${tourDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}</div>
           <div class="timestamp" style="font-size: 0.85em;">Ngày tạo: ${new Date(tour.created_at).toLocaleString('vi-VN', {dateStyle: 'short', timeStyle: 'short'})}</div>
         `;
 
@@ -460,5 +461,6 @@ fetchAllTournaments();
 </script>
 </body>
 </html>
+
 
 
