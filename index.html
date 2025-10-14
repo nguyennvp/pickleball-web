@@ -255,10 +255,24 @@ const SUPABASE_URL = 'https://sugyzhnavjttfmumpacw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3l6aG5hdmp0dGZtdW1wYWN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDc1NTUsImV4cCI6MjA3NTM4MzU1NX0.GQC71AfsKLwvqGu6c0rfDLUq8WmfEVUfrJwQ1Qs5Khs';
 
 function getMonthYear(dateString) {
-  const date = new Date(dateString);
+  const date = parseDateString(dateString);
   const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
                       "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
   return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function parseDateString(dateStr) {
+  // Chuyển đổi "14/10/2025 08:41:38" sang Date object
+  if (!dateStr) return new Date();
+  const parts = dateStr.split(' ');
+  if (parts.length >= 1) {
+    const dateParts = parts[0].split('/');
+    if (dateParts.length === 3) {
+      // dd/MM/yyyy -> yyyy-MM-dd
+      return new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+    }
+  }
+  return new Date(dateStr);
 }
 
 function formatGoalDifference(diff) {
